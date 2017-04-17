@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Movie search</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <form action="/movie_search" method="post">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="movie_url">Movie URL:</label>
+    <input type="text" class="form-control" id="movie_url" name="movie_url">
+  </div>
+  <div class="form-group">
+  <label for="sel1">Rings:</label>
+  <select class="form-control" id="sel1" name="ring">
+    <option>1</option>
+    <option>2</option>
+    <option>3</option>
+    <option>4</option>
+  </select>
+</div>
+  <button type="submit" class="btn btn-default">Submit</button>
+</form>
+</div>
+
+</body>
+</html>
