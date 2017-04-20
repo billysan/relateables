@@ -12,6 +12,9 @@ from models import Movie, MovieRelation
 
 from imdb import liked_by_others, relations_to_json, get_movie_relations
 
+
+MAX_RING_STOP = 2
+
 def index(request):
     return render(request, "index.html")
 
@@ -22,6 +25,9 @@ def movie_search(request):
 
 		movie_url = request.POST['movie_url'].split('?')[0]
 		ring_stop = int(request.POST['ring'])
+
+		if ring_stop > MAX_RING_STOP:
+			ring_stop = MAX_RING_STOP
 
 		print movie_url
 		print Movie.objects.filter(url = movie_url, is_explored = True)
