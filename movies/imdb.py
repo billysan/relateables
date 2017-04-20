@@ -83,42 +83,48 @@ def liked_by_others(movie_url, ring, ring_stop):
 
 	for rec_section in url_data.split('rec_item')[1:-1]:
 		
-		local_url = rec_section.split('href=\"')[1].split('\"')[0].split('?')[0]
-		movie_id = local_url.split('/')[2]
-		
-		related_r = url_data.split('id=\"%s' % movie_id)[1]
-		rating = related_r.split('|')[2]
-		summary_text = related_r.split('<p>')[1].split('</p>')[0]
-		
-		url = "%s%s" % (IMDB_URL, local_url)
-		
-		title = rec_section.split('alt=\"')[1].split('\"')[0]
-
-		#print "%s\t%s" % (title, url)
-
-		related_movie, created = Movie.objects.get_or_create(url = url)
-
-		if created:
-			related_movie.title = title
-			related_movie.url = url
-			related_movie.rating = float(rating)
-			related_movie.info = summary_text.replace('\n', '')
-			related_movie.save()
-
 		try:
-			c1 = Q(movie_1 = base_movie) & Q(movie_2 = related_movie)
-			c2 = Q(movie_1 = related_movie) & Q(movie_2 = base_movie)
+			local_url = rec_section.split('href=\"')[1].split('\"')[0].split('?')[0]
+			movie_id = local_url.split('/')[2]
+			
+			related_r = url_data.split('id=\"%s' % movie_id)[1]
+			rating = related_r.split('|')[2]
+			summary_text = related_r.split('<p>')[1].split('</p>')[0]
+			
+			url = "%s%s" % (IMDB_URL, local_url)
+			
+			title = rec_section.split('alt=\"')[1].split('\"')[0]
 
-			if 0 == MovieRelation.objects.filter(Q(c1) | Q(c2)).count():
-				relation, created = MovieRelation.objects.get_or_create(movie_1 = base_movie, movie_2 = related_movie)
-				relation_objects.append(relation)
-		except Exception as e:
-			print "Could not create relation: %s" % e
+			#print "%s\t%s" % (title, url)
 
-		if ring < ring_stop:
-			other_relations = liked_by_others(url, ring + 1, ring_stop)
-			if other_relations:
-				relation_objects = relation_objects + other_relations		
+			related_movie, created = Movie.objects.get_or_create(url = url)
+
+			if created:
+				related_movie.title = title
+				related_movie.url = url
+				related_movie.rating = float(rating)
+				related_movie.info = summary_text.replace('\n', '')
+				related_movie.save()
+
+			try:
+				c1 = Q(movie_1 = base_movie) & Q(movie_2 = related_movie)
+				c2 = Q(movie_1 = related_movie) & Q(movie_2 = base_movie)
+
+				if 0 == MovieRelation.objects.filter(Q(c1) | Q(c2)).count():
+					relation, created = MovieRelation.objects.get_or_create(movie_1 = base_movie, movie_2 = related_movie)
+					relation_objects.append(relation)
+			except Exception as e:
+				print "Could not create relation: %s" % e
+
+			if ring < ring_stop:
+				try:
+					other_relations = liked_by_others(url, ring + 1, ring_stop)
+					if other_relations:
+						relation_objects = relation_objects + other_relations
+				except:
+					print "Could not fetch URL: %s" % url
+		except:
+			print "Could not parse movie: %s" % movie_url 
 
 	base_movie.is_explored = True
 	base_movie.save()
