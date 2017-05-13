@@ -71,6 +71,9 @@ def liked_by_others(movie_url, ring, ring_stop):
 
 	movie_url = movie_url.split('?')[0]
 
+	if movie_url[-1] == '/':
+		movie_url = movie_url[:-1]
+
 	url_data = urllib2.urlopen(movie_url).read()
 
 	my_title = url_data.split('Share this Rating')[1].split('<strong>')[1].split('</strong>')[0]
@@ -83,13 +86,13 @@ def liked_by_others(movie_url, ring, ring_stop):
 
 	base_movie, created = Movie.objects.get_or_create(url = movie_url)
 
-	base_movie.title = my_title
-	base_movie.url = movie_url
-	base_movie.rating = float(my_rating)
-	base_movie.info = summary_text.replace('\n', '')
-	base_movie.poster = my_poster
-
-	base_movie.save()
+	if created:
+		base_movie.title = my_title
+		base_movie.url = movie_url
+		base_movie.rating = float(my_rating)
+		base_movie.info = summary_text.replace('\n', '')
+		base_movie.poster = my_poster
+		base_movie.save()
 
 	if 'rec_item' in url_data:
 		
@@ -105,6 +108,8 @@ def liked_by_others(movie_url, ring, ring_stop):
 				poster = rec_section.split('loadlate=\"')[1].split('\"')[0]
 
 				url = "%s%s" % (IMDB_URL, local_url)
+				if url[-1] == '/':
+					url = url[:-1]
 				
 				title = rec_section.split('alt=\"')[1].split('\"')[0]
 

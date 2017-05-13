@@ -25,10 +25,10 @@ def index(request):
 
 def movie_search(request):
 
-	if request.method == "POST" and request.POST.get("movie_url") and request.POST.get('ring'):
+	if request.method == "POST" and request.POST.get("movie_url"):
 
 		movie_url = "http://www.imdb.com/title/%s" % request.POST['movie_url']
-		ring_stop = int(request.POST['ring'])
+		ring_stop = 1
 
 		if ring_stop > MAX_RING_STOP:
 			ring_stop = MAX_RING_STOP

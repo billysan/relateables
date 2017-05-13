@@ -63,29 +63,16 @@
       {% csrf_token %}
 
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-12">
           <div class="form-group">
-            <label for="movie_url">Enter movie ID (ttXXXXXXX) or search by name:</label>
-            <input type="text" class="form-control" id="movie_url" name="movie_url">
+            <input type="text" class="form-control input-lg" id="movie_url" name="movie_url" placeholder="movie ID (ttXXXXXXX) or search by name" style="text-align:center">
           </div>
         </div>
       </div>
 
       <div class="row">
-        <div class="col-md-4">
-          <div class="form-group">
-            <label for="sel1">Rings:</label>
-            <select class="form-control" id="sel1" name="ring">
-              <option>1</option>
-              <option>2</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-2">
-          <button id="movie_search" type="submit" class="btn btn-default pull-left">Map it</button>
+        <div class="col-md-offset-5">
+          <button id="movie_search" type="submit" class="btn btn-lg btn-primary col-md-3">visualise</button>
           <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" id="loading_img" style="height: 50px" hidden>
         </div>
       </div>
