@@ -2,9 +2,9 @@
 <!doctype html>
 <html>
 <head>
-  <title>Relations | IMDB</title>
+  <title>Relations | Moviz</title>
 
-  <script type="text/javascript" src="http://visjs.org/dist/vis.js"></script>
+  <script type="text/javascript" src="http://visjs.org/dist/vis.min.js"></script>
   <link href="http://visjs.org/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
 
   <style type="text/css">
@@ -17,9 +17,10 @@
 </head>
 <body>
 
-<div id="mynetwork"></div>
+  <div id="mynetwork"></div>
 
-<script type="text/javascript">
+  <script type="text/javascript">
+  
   // create an array with nodes
   var nodes = new vis.DataSet( {{ nodes|safe }} );
 
@@ -28,11 +29,27 @@
 
   // create a network
   var container = document.getElementById('mynetwork');
+  
   var data = {
     nodes: nodes,
     edges: edges
   };
-  var options = {};
+  
+  var options = {
+    nodes: {
+      borderWidth:4,
+      size:30,
+      color: {
+        border: '#222222',
+        background: '#000000'
+      },
+      font:{color:'#0000ff'}
+    },
+    edges: {
+      color: 'lightgray'
+    }
+  }
+
   var network = new vis.Network(container, data, options);
 </script>
 

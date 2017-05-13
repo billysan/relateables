@@ -1,24 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Movie search</title>
+  <title>Relations | Moviz</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css">
+  <style>
+    .ui-autocomplete-loading {
+      background: white url("http://code.jquery.com/images/ui-anim_basic_16x16.gif") right center no-repeat;
+    }
+  </style>
+
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+  <script>
+    
+    $( function() {
+
+      $( "#movie_url" ).autocomplete({
+        source: function (request, response) {
+          $.get("/imdber?term=" + request.term, function (data) {
+
+            var aso = JSON.parse(data.replace(/'/g, '"'));
+
+            var y = $.map(aso.results, function (value, key) {
+              return {
+                label: value,
+                value: key
+              };
+            });
+            
+            response(y);
+
+          });
+        },
+        minLength: 2,
+        delay: 100,
+        select: function( event, ui ) {
+          $("#loading_img").show();
+          setTimeout(function() { $("#movie_search").click(); }, 2000);
+        }
+      } );
+    } );
+
+    $("#movie_search").click(function() {
+      $("#loading_img").show();
+    });
+
+  </script>
 </head>
 <body>
 
   <div class="container">
     <form action="/movie_search" method="post">
-      
+
       {% csrf_token %}
 
       <div class="row">
         <div class="col-md-4">
           <div class="form-group">
-            <label for="movie_url">Movie URL:</label>
+            <label for="movie_url">Enter movie ID (ttXXXXXXX) or search by name:</label>
             <input type="text" class="form-control" id="movie_url" name="movie_url">
           </div>
         </div>
@@ -37,10 +84,12 @@
       </div>
 
       <div class="row">
-        <button type="submit" class="btn btn-default">Submit</button>
+        <div class="col-md-2">
+          <button id="movie_search" type="submit" class="btn btn-default pull-left">Map it</button>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" id="loading_img" style="height: 50px" hidden>
+        </div>
       </div>
     </form>
-  </div>
 
 </body>
 </html>

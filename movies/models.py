@@ -13,6 +13,8 @@ class Movie(models.Model):
     rating = models.FloatField(default = 0)
     genre = models.CharField(max_length=20)
     info = models.CharField(max_length=1024, blank = True, null = True)
+    
+    poster = models.CharField(max_length=1024, blank = True, null = True)
 
     def __unicode__(self):
     	return self.title 
