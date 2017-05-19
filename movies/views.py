@@ -25,28 +25,48 @@ def index(request):
 
 def movie_search(request):
 
-	if request.method == "POST" and request.POST.get("movie_url"):
+	try:
 
-		movie_url = "http://www.imdb.com/title/%s" % request.POST['movie_url']
-		ring_stop = 1
+		if request.method == "POST" and request.POST.get("movie_url"):
 
-		if ring_stop > MAX_RING_STOP:
-			ring_stop = MAX_RING_STOP
+			movie_url = "http://www.imdb.com/title/%s" % request.POST['movie_url']
+			ring_stop = 1
 
-		print movie_url
-		print Movie.objects.filter(url = movie_url, is_explored = True)
+			if ring_stop > MAX_RING_STOP:
+				ring_stop = MAX_RING_STOP
 
-		try:
-			movie = Movie.objects.get(url = movie_url, is_explored = True)
+			print movie_url
+			print Movie.objects.filter(url = movie_url, is_explored = True)
+
+			try:
+				movie = Movie.objects.get(url = movie_url, is_explored = True)
+				
+				relations = get_movie_relations(movie, 0, ring_stop)
+
+				nodes, edges = relations_to_json(relations)
 			
-			relations = get_movie_relations(movie, 0, ring_stop)
+			except Movie.DoesNotExist:
+				nodes, edges = relations_to_json(set(liked_by_others(movie_url, 0, ring_stop)))
 
-			nodes, edges = relations_to_json(relations)
+			return render(request, "movie_graph.html", context = { 'nodes' : json.dumps(nodes), 'edges' : json.dumps(edges) })
+
+		else:
+			raise ValueError
+
+	except ValueError:
+		context = {
+			'message' : 'Your input was not valid'
+		}
 		
-		except Movie.DoesNotExist:
-			nodes, edges = relations_to_json(set(liked_by_others(movie_url, 0, ring_stop)))
+		return render(request, "index.html", context = context)
 
-		return render(request, "movie_graph.html", context = { 'nodes' : json.dumps(nodes), 'edges' : json.dumps(edges) })
+	except:
+		context = {
+			'message' : 'An error occured while getting results from IMDB.'
+		}
+
+		return render(request, "index.html", context = context)
+
 
 def json_response(func):
     """
@@ -92,6 +112,7 @@ def get_imdb_suggestions(request):
 		end_results[results] = { }
 
 		for e in results_q:
+			print e
 			entry = re.sub(r'[^\x00-\x7f]',r'.', e['l'].encode('utf-8').strip()).replace('\'','').encode('utf-8').strip()
 			mdbid = re.sub(r'[^\x00-\x7f]',r'.', e['id'].encode('utf-8').strip()).encode('utf-8').strip()
 			

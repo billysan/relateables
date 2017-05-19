@@ -38,8 +38,8 @@ def relations_to_json(relations):
 			nodes.append(
 				{
 					"id" : r.movie_1.pk,
-					"label" : "%s (%s)" % (r.movie_1.title, str(r.movie_1.rating)),
-					"title" : r.movie_1.info,
+					#"label" : "%s (%s)" % (r.movie_1.title, str(r.movie_1.rating)),
+					"title" : "%s (%s): %s" % (r.movie_1.title, str(r.movie_1.rating), r.movie_1.info),
 					"shape" : "circularImage",
 					"image" : r.movie_1.poster,
 					"brokenImage" : "https://www.iconexperience.com/_img/v_collection_png/512x512/shadow/movie.png"
@@ -51,8 +51,8 @@ def relations_to_json(relations):
 			nodes.append(
 				{ 
 					"id" : r.movie_2.pk,
-					"label" : "%s (%s)" % (r.movie_2.title, str(r.movie_2.rating)),
-					"title" : r.movie_2.info,
+					#"label" : "%s (%s)" % (r.movie_2.title, str(r.movie_2.rating)),
+					"title" : "%s (%s): %s" % (r.movie_2.title, str(r.movie_2.rating), r.movie_2.info),
 					"shape" : "circularImage",
 					"image" : r.movie_2.poster,
 					"brokenImage" : "https://www.iconexperience.com/_img/v_collection_png/512x512/shadow/movie.png"
