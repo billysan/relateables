@@ -5,62 +5,63 @@ import re
 import json
 import simplejson
 import requests
-
+import traceback
+import random
 from itertools import chain
 
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.db.models import Q
 
+from relateables.settings import SEARCH_PLACEHOLDERS, IMDB_URL_PREFIX, IMDB_SUGGEST_PREFIX
+
 from models import Movie, MovieRelation
 
-from imdb import liked_by_others, relations_to_json, get_movie_relations
+from imdb import liked_by_others, relations_to_json
 
-
-MAX_RING_STOP = 2
 
 def index(request):
-    return render(request, "index.html")
+
+	context = {
+		'random_search_placeholder' : random.choice(SEARCH_PLACEHOLDERS)
+	}
+
+	return render(request, 'index.html', context = context)
 
 
 def movie_search(request):
 
 	try:
 
-		if request.method == "POST" and request.POST.get("movie_url"):
+		if request.method == "POST" and request.POST.get('movie_url'):
 
-			movie_url = "http://www.imdb.com/title/%s" % request.POST['movie_url']
-			ring_stop = 1
+			movie_url = "%s%s" % (IMDB_URL_PREFIX, request.POST['movie_url'])
 
-			if ring_stop > MAX_RING_STOP:
-				ring_stop = MAX_RING_STOP
+			nodes, edges = relations_to_json(movie_url, set(liked_by_others(movie_url, 0, 1)))
 
-			print movie_url
-			print Movie.objects.filter(url = movie_url, is_explored = True)
+			movie_obj = Movie.objects.get(url = movie_url)
 
-			try:
-				movie = Movie.objects.get(url = movie_url, is_explored = True)
-				
-				relations = get_movie_relations(movie, 0, ring_stop)
-
-				nodes, edges = relations_to_json(relations)
+			context = { 
+				'movie' : movie_obj,
+				'nodes' : json.dumps(nodes),
+				'edges' : json.dumps(edges)
+			}
 			
-			except Movie.DoesNotExist:
-				nodes, edges = relations_to_json(set(liked_by_others(movie_url, 0, ring_stop)))
-
-			return render(request, "movie_graph.html", context = { 'nodes' : json.dumps(nodes), 'edges' : json.dumps(edges) })
+			return render(request, "movie_graph.html", context = context)
 
 		else:
 			raise ValueError
 
-	except ValueError:
+	except ValueError as e:
+		print traceback.format_exc()
 		context = {
 			'message' : 'Your input was not valid'
 		}
 		
 		return render(request, "index.html", context = context)
 
-	except:
+	except Exception as e:
+		print traceback.format_exc()
 		context = {
 			'message' : 'An error occured while getting results from IMDB.'
 		}
@@ -98,28 +99,32 @@ def get_imdb_suggestions(request):
 
 	if query:
 
-		query = query.replace(' ', '_').lower()
-		query_url = "https://v2.sg.media-imdb.com/suggests/%s/%s.json" % (query[0], query)
-		req = requests.get(query_url)
+		try:
+		
+			query = query.replace(' ', '_').lower()
+			query_url = "%s/%s/%s.json" % (IMDB_SUGGEST_PREFIX, query[0], query)
+		
+			req = requests.get(query_url)
 
-		results_str = unicode(req.content, 'latin-1').split("%s(" % query)[1][:-1]
-		results_q = simplejson.loads(results_str)['d']
+			results_str = unicode(req.content, 'latin-1').split("%s(" % query)[1][:-1]
+			results_q = simplejson.loads(results_str)['d']
 
-		end_results = { }
+			search_results = { }
 
-		results = 'results'.encode('utf-8').strip()
+			results = 'results'.encode('utf-8').strip()
 
-		end_results[results] = { }
+			search_results[results] = { }
 
-		for e in results_q:
-			print e
-			entry = re.sub(r'[^\x00-\x7f]',r'.', e['l'].encode('utf-8').strip()).replace('\'','').encode('utf-8').strip()
-			mdbid = re.sub(r'[^\x00-\x7f]',r'.', e['id'].encode('utf-8').strip()).encode('utf-8').strip()
-			
-			if 'tt' in mdbid:
-				end_results[results][mdbid] = entry
+			for e in results_q:
+				entry = re.sub(r'[^\x00-\x7f]',r'.', e['l'].encode('utf-8').strip()).replace('\'','').encode('utf-8').strip()
+				mdbid = re.sub(r'[^\x00-\x7f]',r'.', e['id'].encode('utf-8').strip()).encode('utf-8').strip()
+				
+				if 'tt' in mdbid:
+					search_results[results][mdbid] = entry
 
-		print end_results
-		return end_results
+			return search_results
 
+		except:
+			return { }
+	
 	return {}

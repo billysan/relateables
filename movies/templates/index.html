@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Relations | Moviz</title>
+    <title>muvis</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
@@ -61,6 +61,8 @@
 
     <div id="movie_search_container" class="container" hidden>
 
+      <div class="help-block"></div>
+
       {% if message %}
         
         <div class="row">
@@ -80,14 +82,14 @@
         <div class="row">
           <div class="col-md-12">
             <div class="form-group">
-              <input type="text" class="form-control input-lg" id="movie_url" name="movie_url" placeholder="movie ID (ttXXXXXXX) or search by name" style="text-align:center">
+              <input type="text" class="form-control input-lg" id="movie_url" name="movie_url" placeholder="{{ random_search_placeholder }}" style="text-align:center">
             </div>
           </div>
         </div>
 
         <div class="row">
           <div class="col-md-offset-5">
-            <button id="movie_search" type="submit" class="btn btn-lg btn-primary col-md-3">visualise</button>
+            <button id="movie_search" type="submit" class="btn btn-lg btn-primary col-md-3">visualise it</button>
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" id="loading_img" style="height: 50px" hidden>
           </div>
         </div>

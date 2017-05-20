@@ -119,3 +119,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+IMDB_SUGGEST_PREFIX = 'https://v2.sg.media-imdb.com/suggests'
+
+IMDB_URL_PREFIX = 'http://www.imdb.com/title/'
+
+IMDB_URL = 'http://www.imdb.com'
+
+BROKEN_IMAGE_URL = 'https://www.iconexperience.com/_img/v_collection_png/512x512/shadow/movie.png'
+
+SEARCH_PLACEHOLDERS = [
+    'got a nice movie?',
+    'got a nice series?',
+    'seen something nice lately?',
+    'what\'s your favorite show?',
+    'what\'s on your watch list?',
+]

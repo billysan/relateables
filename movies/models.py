@@ -17,7 +17,7 @@ class Movie(models.Model):
     poster = models.CharField(max_length=1024, blank = True, null = True)
 
     def __unicode__(self):
-    	return self.title 
+    	return self.title
 
     def __str__(self):
     	return self.title
