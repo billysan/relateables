@@ -14,11 +14,11 @@ from relateables.settings import IMDB_URL, BROKEN_IMAGE_URL
 def get_movie_node(base_url, movie):
 	return {
 		"id" : movie.pk,
+		"label" : str(movie.rating),
 		"title" : "%s (%s): %s" % (movie.title, str(movie.rating), movie.info),
 		"shape" : "circularImage",
 		"image" : movie.poster,
-		"brokenImage" : BROKEN_IMAGE_URL,
-		"size" : 50 if movie.url == base_url else 35
+		"size" : 55 if movie.url == base_url else 40
 	}
 
 
@@ -44,7 +44,7 @@ def relations_to_json(base_url, relations):
 	return (nodes, edges)
 
 
-def exploer_url(movie_url, ring, ring_stop):
+def explore_url(movie_url, ring, ring_stop):
 
 	url_data = urllib2.urlopen(movie_url).read()
 
@@ -54,16 +54,19 @@ def exploer_url(movie_url, ring, ring_stop):
 		base_title = url_data.split('Share this Rating')[1].split('<strong>')[1].split('</strong>')[0]
 		base_rating = url_data.split('<span itemprop="ratingValue">')[1].split('</span>')[0]
 	except IndexError:
+		print traceback.format_exc()
 		return relation_objects
 
 	try:
 		base_poster = url_data.split('<div class=\"poster\">')[1].split('src=\"')[1].split('\"')[0]
 	except IndexError:
+		print traceback.format_exc()
 		base_poster = BROKEN_IMAGE_URL
 
 	try:
 		base_summary_text = url_data.split('<div class=\"summary_text\" itemprop=\"description\">')[1].split('</div>')[0]
 	except IndexError:
+		print traceback.format_exc()
 		base_summary_text = 'Missing summary'
 
 	base_movie, created = Movie.objects.get_or_create(url = movie_url)
@@ -156,9 +159,13 @@ def liked_by_others(movie_url, ring, ring_stop):
 				relation_objects = list(chain(relation_objects, liked_by_others(r.movie_2.url, ring + 1, ring_stop)))
 
 			return list(set(relation_objects))
-		
+
 		else:
 			return list(set(relations))
 
 	except Movie.DoesNotExist:
-		return exploer_url(movie_url, ring, ring_stop)
+		return explore_url(movie_url, ring, ring_stop)
+
+	except:
+		print traceback.format_exc()
+		return [ ]
