@@ -41,28 +41,29 @@ def movie_search(request):
 
 			movie_obj = Movie.objects.get(url = movie_url)
 
-			context = { 
+			context = {
+				'random_search_placeholder' : random.choice(SEARCH_PLACEHOLDERS),
 				'movie' : movie_obj,
 				'nodes' : json.dumps(nodes),
 				'edges' : json.dumps(edges)
 			}
-			
+
 			return render(request, "movie_graph.html", context = context)
 
 		else:
 			raise ValueError
 
 	except ValueError as e:
-		print traceback.format_exc()
 		context = {
+			'random_search_placeholder' : random.choice(SEARCH_PLACEHOLDERS),
 			'message' : 'Your input was not valid'
 		}
 		
 		return render(request, "index.html", context = context)
 
 	except Exception as e:
-		print traceback.format_exc()
 		context = {
+			'random_search_placeholder' : random.choice(SEARCH_PLACEHOLDERS),
 			'message' : 'An error occured while getting results from IMDB.'
 		}
 
@@ -116,9 +117,21 @@ def get_imdb_suggestions(request):
 			search_results[results] = { }
 
 			for e in results_q:
-				entry = re.sub(r'[^\x00-\x7f]',r'.', e['l'].encode('utf-8').strip()).replace('\'','').encode('utf-8').strip()
-				mdbid = re.sub(r'[^\x00-\x7f]',r'.', e['id'].encode('utf-8').strip()).encode('utf-8').strip()
 				
+				entry = ''
+				
+				if e.has_key('l'):
+					entry = e['l'].encode('utf-8').strip()
+
+				if e.has_key('q'):
+					entry += " - %s" % e['q']
+
+				if e.has_key('y'):
+					entry += " (%d)" % e['y']
+
+				entry = re.sub(r'[^\x00-\x7f]',r'.', entry.encode('utf-8').strip()).replace('\'','').encode('utf-8').strip()
+				mdbid = re.sub(r'[^\x00-\x7f]',r'.', e['id'].encode('utf-8').strip()).encode('utf-8').strip()
+
 				if 'tt' in mdbid:
 					search_results[results][mdbid] = entry
 
@@ -127,4 +140,4 @@ def get_imdb_suggestions(request):
 		except:
 			return { }
 	
-	return {}
+	return { }

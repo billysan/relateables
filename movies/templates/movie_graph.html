@@ -2,13 +2,59 @@
 <!doctype html>
 <html>
 <head>
+
   <title>{{ movie.title }} | muvis</title>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="http://visjs.org/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="http://visjs.org/dist/vis.min.js"></script>
-  <link href="http://visjs.org/dist/vis-network.min.css" rel="stylesheet" type="text/css" />
+
+  <script>
+
+    $(function() {
+
+      $( "#movie_url" ).autocomplete({
+        source: function (request, response) {
+          $.get("/imdber?term=" + request.term, function (data) {
+
+            var aso = JSON.parse(data.replace(/'/g, '"'));
+
+            var y = $.map(aso.results, function (value, key) {
+              return {
+                label: value,
+                value: key
+              };
+            });
+            
+            response(y);
+
+          });
+        },
+        minLength: 2,
+        delay: 100,
+        select: function( event, ui ) {
+          $("#loading_img").show();
+          setTimeout(function() { $("#movie_search").click(); }, 2000);
+        }
+      } );
+    } );
+
+    $("#movie_search").click(function() {
+      $("#loading_img").show();
+    });
+
+    $(document).ready(function() { $("#movie_search_container").fadeIn(); });
+
+  </script>
 
   <style type="text/css">
     #mynetwork {
@@ -20,10 +66,49 @@
 </head>
 <body>
 
-  <div id="mynetwork"></div>
+  <div id="movie_search_container" class="container" hidden>
+
+    <div class="help-block"></div>
+
+    {% if message %}
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="alert alert-warning">
+          {{ message }}
+        </div>
+      </div>
+    </div>
+
+    {% endif %}
+
+    <form action="/movie_search" method="post">
+
+      {% csrf_token %}
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <input type="text" class="form-control input-lg" id="movie_url" name="movie_url" placeholder="{{ random_search_placeholder }}" style="text-align:center">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-offset-5">
+          <button id="movie_search" type="submit" class="btn btn-lg btn-primary col-md-3">visualise it</button>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" id="loading_img" style="height: 50px" hidden>
+        </div>
+      </div>
+
+    </form>
+
+    <div id="mynetwork"></div>
+
+  </div>
 
   <script type="text/javascript">
-  
+
   // create an array with nodes
   var nodes = new vis.DataSet( {{ nodes|safe }} );
 
