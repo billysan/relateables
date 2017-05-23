@@ -9,7 +9,7 @@ from django.db.models import Q
 
 from models import Movie, MovieRelation
 
-from relateables.settings import IMDB_URL, BROKEN_IMAGE_URL, WORDS_PER_LINE_IN_MOVIE_INFO
+from relateables.settings import IMDB_URL, BROKEN_IMAGE_URL, WORDS_PER_LINE_IN_MOVIE_INFO, INFO_CHARS_NEWLINES_THRESHOLD
 
 
 class MLStripper(HTMLParser):
@@ -30,18 +30,29 @@ def strip_tags(html):
 
 def format_title(movie):
 
-	title = "%s (%s)" % (movie.title, str(movie.rating))
+	info_perfix = "<i><b>%s</b></i>" % (movie.title)
+
 	info = ''
 
-	if len(title.split(' ')) < WORDS_PER_LINE_IN_MOVIE_INFO:
-		wpl = WORDS_PER_LINE_IN_MOVIE_INFO
+	if len(movie.info) < INFO_CHARS_NEWLINES_THRESHOLD:
+		
+		info = movie.info
+
 	else:
-		wpl = len(title.split(' ')) 
 
-	for i in (range(len(movie.info.split(' ')) / wpl + 1)):
-		info += ' '.join(movie.info.split(' ')[i * wpl : i * wpl + wpl]) + '<br>'
+		info_arr = movie.info.split(' ')
+		current_line = info_perfix
 
-	return "<b>%s</b>:<br> %s" % (title, info)
+		for word in info_arr:
+
+			info += word + ' '
+			current_line += word + ' '
+			
+			if len(current_line) > INFO_CHARS_NEWLINES_THRESHOLD:
+				info += '<br>'
+				current_line = ''
+
+	return "%s: %s" % (info_perfix, info)
 
 
 def get_movie_node(base_url, movie):

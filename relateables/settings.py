@@ -130,6 +130,8 @@ BROKEN_IMAGE_URL = 'https://www.iconexperience.com/_img/v_collection_png/512x512
 
 WORDS_PER_LINE_IN_MOVIE_INFO = 8
 
+INFO_CHARS_NEWLINES_THRESHOLD = 70
+
 SEARCH_PLACEHOLDERS = [
     'got a nice movie?',
     'got a nice series?',

@@ -20,6 +20,11 @@
 
   <script>
 
+    function search_button_loading(dots_count) {
+      $("#movie_search").text('just a sec' + '.'.repeat(dots_count));
+      setTimeout(search_button_loading, 180, (dots_count + 1) % 4);
+    }
+
     $(function() {
 
       $( "#movie_url" ).autocomplete({
@@ -34,7 +39,7 @@
                 value: key
               };
             });
-            
+
             response(y);
 
           });
@@ -42,15 +47,11 @@
         minLength: 2,
         delay: 100,
         select: function( event, ui ) {
-          $("#loading_img").show();
+          search_button_loading(1);
           setTimeout(function() { $("#movie_search").click(); }, 2000);
         }
       } );
     } );
-
-    $("#movie_search").click(function() {
-      $("#loading_img").show();
-    });
 
     $(document).ready(function() { $("#movie_search_container").fadeIn(); });
 
@@ -63,6 +64,7 @@
       border: 1px solid white;
     }
   </style>
+  
 </head>
 <body>
 
@@ -95,7 +97,6 @@
       <div class="row">
         <div class="col-md-offset-5">
           <button id="movie_search" type="submit" class="btn btn-lg btn-primary col-md-3">visualise it</button>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" id="loading_img" style="height: 50px" hidden>
         </div>
       </div>
 
@@ -140,16 +141,15 @@
   var network = new vis.Network(container, data, options);
 
   network.on("doubleClick", function (params) {
-      
-      params.event = "[original event]";
 
-      if (params['nodes'].length == 1) {
-        var bf = params['nodes'][0]
-        var url = "http://www.imdb.com/title/" + bf;
+    params.event = "[original event]";
 
-        var imdb_url = window.open(url, '_blank');
-        imdb_url.focus();
-      }
+    if (params['nodes'].length == 1) {
+      var bf = params['nodes'][0]
+      var url = "http://www.imdb.com/title/" + bf;
+      var imdb_url = window.open(url, '_blank');
+      imdb_url.focus();
+    }
 
   });
 

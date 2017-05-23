@@ -1,97 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
 
-    <title>muvis</title>
+  <title>muvis</title>
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
-    <script>
-      
-      $(function() {
+  <style>
+    body {
+      background-image: url('https://68.media.tumblr.com/ee57fc6ed088cb0f7702db293e4ddf84/tumblr_nvto6pcGCm1qai3sgo1_500.gif');
+      background-size: cover;
+    }
+  </style>
 
-        $( "#movie_url" ).autocomplete({
-          source: function (request, response) {
-            $.get("/imdber?term=" + request.term, function (data) {
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-              var aso = JSON.parse(data.replace(/'/g, '"'));
+  <script>
 
-              var y = $.map(aso.results, function (value, key) {
-                return {
-                  label: value,
-                  value: key
-                };
-              });
-              
-              response(y);
+    function search_button_loading(dots_count) {
+      $("#movie_search").text('just a sec' + '.'.repeat(dots_count));
+      setTimeout(search_button_loading, 180, (dots_count + 1) % 4);
+    }
 
+    $(function() {
+
+      $( "#movie_url" ).autocomplete({
+        source: function (request, response) {
+          $.get("/imdber?term=" + request.term, function (data) {
+
+            var aso = JSON.parse(data.replace(/'/g, '"'));
+
+            var y = $.map(aso.results, function (value, key) {
+              return {
+                label: value,
+                value: key
+              };
             });
-          },
-          minLength: 2,
-          delay: 100,
-          select: function( event, ui ) {
-            $("#loading_img").show();
-            setTimeout(function() { $("#movie_search").click(); }, 2000);
-          }
-        } );
+
+            response(y);
+
+          });
+        },
+        minLength: 2,
+        delay: 100,
+        select: function( event, ui ) {
+          search_button_loading(1);
+          setTimeout(function() { $("#movie_search").click(); }, 2000);
+        }
       } );
+    } );
 
-      $("#movie_search").click(function() {
-        $("#loading_img").show();
-      });
+    $(document).ready(function() { $("#movie_search_container").fadeIn(); });
 
-      $(document).ready(function() { $("#movie_search_container").fadeIn(); });
+  </script>
+</head>
+<body>
 
-    </script>
-  </head>
-  <body>
+  <div id="movie_search_container" class="container" hidden>
 
-    <div id="movie_search_container" class="container" hidden>
+    <div class="help-block"></div>
 
-      <div class="help-block"></div>
+    {% if message %}
 
-      {% if message %}
-        
-        <div class="row">
-          <div class="col-md-12">
-            <div class="alert alert-warning">
-              {{ message }}
-            </div>
-          </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="alert alert-warning">
+          {{ message }}
         </div>
-
-      {% endif %}
-
-      <form action="/muvis" method="get">
-
-        <div class="row">
-          <div class="col-md-12">
-            <div class="form-group">
-              <input type="text" class="form-control input-lg" id="movie_url" name="bf" placeholder="{{ random_search_placeholder }}" style="text-align:center">
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-offset-5">
-            <button id="movie_search" type="submit" class="btn btn-lg btn-primary col-md-3">visualise it</button>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" id="loading_img" style="height: 50px" hidden>
-          </div>
-        </div>
-
-      </form>
-      
+      </div>
     </div>
 
-  </body>
+    {% endif %}
+
+    <form action="/muvis" method="get">
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="form-group">
+            <input type="text" class="form-control input-lg" id="movie_url" name="bf" placeholder="{{ random_search_placeholder }}" style="text-align:center">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-offset-5">
+          <button id="movie_search" type="submit" class="btn btn-lg btn-primary col-md-3">visualise it</button>
+        </div>
+      </div>
+
+    </form>
+
+  </div>
+
+</body>
 
 </html>
