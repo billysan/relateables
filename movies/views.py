@@ -33,9 +33,9 @@ def movie_search(request):
 
 	try:
 
-		if request.method == "POST" and request.POST.get('movie_url'):
+		if request.method == "GET" and request.GET.get('bf'):
 
-			movie_url = "%s%s" % (IMDB_URL_PREFIX, request.POST['movie_url'])
+			movie_url = "%s%s" % (IMDB_URL_PREFIX, request.GET['bf'])
 
 			nodes, edges = relations_to_json(movie_url, set(liked_by_others(movie_url, 0, 1)))
 
@@ -58,7 +58,7 @@ def movie_search(request):
 			'random_search_placeholder' : random.choice(SEARCH_PLACEHOLDERS),
 			'message' : 'Your input was not valid'
 		}
-		
+		print traceback.format_exc()
 		return render(request, "index.html", context = context)
 
 	except Exception as e:
@@ -66,7 +66,7 @@ def movie_search(request):
 			'random_search_placeholder' : random.choice(SEARCH_PLACEHOLDERS),
 			'message' : 'An error occured while getting results from IMDB.'
 		}
-
+		print traceback.format_exc()
 		return render(request, "index.html", context = context)
 
 
@@ -138,6 +138,7 @@ def get_imdb_suggestions(request):
 			return search_results
 
 		except:
+			print traceback.format_exc()
 			return { }
 	
 	return { }

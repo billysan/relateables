@@ -2,20 +2,53 @@
 import urllib2
 import traceback
 
+from HTMLParser import HTMLParser
 from itertools import chain
 
 from django.db.models import Q
 
 from models import Movie, MovieRelation
 
-from relateables.settings import IMDB_URL, BROKEN_IMAGE_URL
+from relateables.settings import IMDB_URL, BROKEN_IMAGE_URL, WORDS_PER_LINE_IN_MOVIE_INFO
+
+
+class MLStripper(HTMLParser):
+    def __init__(self):
+        self.reset()
+        self.fed = []
+    def handle_data(self, d):
+        self.fed.append(d)
+    def get_data(self):
+        return ''.join(self.fed)
+
+
+def strip_tags(html):
+    s = MLStripper()
+    s.feed(html)
+    return s.get_data()
+
+
+def format_title(movie):
+
+	title = "%s (%s)" % (movie.title, str(movie.rating))
+	info = ''
+
+	if len(title.split(' ')) < WORDS_PER_LINE_IN_MOVIE_INFO:
+		wpl = WORDS_PER_LINE_IN_MOVIE_INFO
+	else:
+		wpl = len(title.split(' ')) 
+
+	for i in (range(len(movie.info.split(' ')) / wpl + 1)):
+		info += ' '.join(movie.info.split(' ')[i * wpl : i * wpl + wpl]) + '<br>'
+
+	return "<b>%s</b>:<br> %s" % (title, info)
 
 
 def get_movie_node(base_url, movie):
 	return {
-		"id" : movie.pk,
+		"id" : movie.url.split('/')[-1], # ttXXXXXX
 		"label" : str(movie.rating),
-		"title" : "%s (%s): %s" % (movie.title, str(movie.rating), movie.info),
+		"title" : format_title(movie),
 		"shape" : "circularImage",
 		"image" : movie.poster,
 		"size" : 55 if movie.url == base_url else 40
@@ -31,6 +64,9 @@ def relations_to_json(base_url, relations):
 
 	for r in relations:
 
+		movie_1_id = r.movie_1.url.split('/')[-1]
+		movie_2_id = r.movie_2.url.split('/')[-1]
+
 		if not r.movie_1.pk in known_movies:
 			nodes.append(get_movie_node(base_url, r.movie_1))
 			known_movies.append(r.movie_1.pk)
@@ -39,7 +75,7 @@ def relations_to_json(base_url, relations):
 			nodes.append(get_movie_node(base_url, r.movie_2))
 			known_movies.append(r.movie_2.pk)
 	
-		edges.append({ "from" : r.movie_1.pk, "to" : r.movie_2.pk })
+		edges.append({ "from" : movie_1_id, "to" : movie_2_id })
 
 	return (nodes, edges)
 
@@ -73,7 +109,7 @@ def explore_url(movie_url, ring, ring_stop):
 	base_movie.title = base_title
 	base_movie.url = movie_url
 	base_movie.rating = float(base_rating)
-	base_movie.info = base_summary_text.replace('\n', '')
+	base_movie.info = strip_tags(base_summary_text.replace('\n', '').replace('See full summary', '').strip())
 	base_movie.poster = base_poster
 	base_movie.save()
 
@@ -103,7 +139,7 @@ def explore_url(movie_url, ring, ring_stop):
 				related_movie.title = related_title
 				related_movie.url = related_url
 				related_movie.rating = float(related_rating)
-				related_movie.info = related_summary_text.replace('\n', '')
+				related_movie.info = strip_tags(related_summary_text.replace('\n', '').replace('See full summary', '').strip())
 				related_movie.poster = related_poster
 				related_movie.save()
 

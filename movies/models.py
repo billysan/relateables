@@ -11,10 +11,8 @@ class Movie(models.Model):
     url = models.CharField(max_length=200, unique = True)
     is_explored = models.BooleanField(default = False)
     rating = models.FloatField(default = 0)
-    genre = models.CharField(max_length=20)
-    info = models.CharField(max_length=1024, blank = True, null = True)
-    
-    poster = models.CharField(max_length=1024, blank = True, null = True)
+    info = models.CharField(max_length=2048, blank = True, null = True)
+    poster = models.CharField(max_length=2048, blank = True, null = True)
 
     def __unicode__(self):
     	return self.title

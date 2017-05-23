@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+
     <title>muvis</title>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
@@ -69,14 +71,12 @@
 
       {% endif %}
 
-      <form action="/movie_search" method="post">
-
-        {% csrf_token %}
+      <form action="/muvis" method="get">
 
         <div class="row">
           <div class="col-md-12">
             <div class="form-group">
-              <input type="text" class="form-control input-lg" id="movie_url" name="movie_url" placeholder="{{ random_search_placeholder }}" style="text-align:center">
+              <input type="text" class="form-control input-lg" id="movie_url" name="bf" placeholder="{{ random_search_placeholder }}" style="text-align:center">
             </div>
           </div>
         </div>

@@ -82,14 +82,12 @@
 
     {% endif %}
 
-    <form action="/movie_search" method="post">
-
-      {% csrf_token %}
+    <form action="/muvis" method="get">
 
       <div class="row">
         <div class="col-md-12">
           <div class="form-group">
-            <input type="text" class="form-control input-lg" id="movie_url" name="movie_url" placeholder="{{ random_search_placeholder }}" style="text-align:center">
+            <input type="text" class="form-control input-lg" id="movie_url" name="bf" placeholder="{{ random_search_placeholder }}" style="text-align:center">
           </div>
         </div>
       </div>
@@ -131,7 +129,7 @@
         background : '#000000'
       },
       font: {
-        color : '#fa8072'
+        color : '#9370db'
       }
     },
     edges: {
@@ -140,6 +138,20 @@
   };
 
   var network = new vis.Network(container, data, options);
+
+  network.on("doubleClick", function (params) {
+      
+      params.event = "[original event]";
+
+      if (params['nodes'].length == 1) {
+        var bf = params['nodes'][0]
+        var url = "http://www.imdb.com/title/" + bf;
+
+        var imdb_url = window.open(url, '_blank');
+        imdb_url.focus();
+      }
+
+  });
 
 </script>
 
