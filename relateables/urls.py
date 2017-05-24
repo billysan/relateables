@@ -23,5 +23,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.index, name='index'),
     url(r'^imdber$', views.get_imdb_suggestions, name='get_imdb_suggestions'),
-    url(r'^mewvis$', views.movie_search, name='movie_search')
+    url(r'^i$', views.movie_search, name='movie_search')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
