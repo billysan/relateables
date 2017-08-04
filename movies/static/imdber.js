@@ -27,6 +27,7 @@ $(function() {
     delay: 100,
     select: function( event, ui ) {
       search_button_loading(1);
+      $( "#movie_url" ).fadeOut();
       setTimeout(function() { $("#movie_search").click(); }, 2000);
     }
   } );
